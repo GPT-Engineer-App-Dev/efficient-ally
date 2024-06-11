@@ -1,5 +1,6 @@
 import { Container, VStack, Heading, Text, Box, Flex, Tag, Checkbox, Button } from "@chakra-ui/react";
 import { useState } from "react";
+import { useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, FormControl, FormLabel, Input, Select } from "@chakra-ui/react";
 
 const Index = () => {
   const [tasks, setTasks] = useState([
@@ -7,6 +8,13 @@ const Index = () => {
     { id: 2, title: "Read a book", dueDate: "2023-04-20", category: "Leisure", priority: "Low", completed: false },
     // Placeholder tasks
   ]);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const handleEditClick = (task) => {
+    setSelectedTask(task);
+    onOpen();
+  };
 
   return (
     <Container maxW="container.md" py={8}>
@@ -22,13 +30,55 @@ const Index = () => {
                   <Text fontSize="sm">Due: {task.dueDate}</Text>
                   <Tag size="sm" colorScheme={task.priority === "High" ? "red" : "green"}>{task.category}</Tag>
                 </VStack>
-                <Checkbox size="lg" colorScheme="green" defaultChecked={task.completed} />
+                <Flex>
+                  <Checkbox size="lg" colorScheme="green" defaultChecked={task.completed} />
+                  <Button size="sm" colorScheme="blue" onClick={() => handleEditClick(task)}>Edit</Button>
+                </Flex>
               </Flex>
             </Box>
           ))}
         </Flex>
         <Button colorScheme="blue" size="md">Add New Task</Button>
       </VStack>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Edit Task</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <FormControl>
+              <FormLabel>Title</FormLabel>
+              <Input placeholder="Title" value={selectedTask?.title || ''} onChange={(e) => setSelectedTask({...selectedTask, title: e.target.value})} />
+            </FormControl>
+            <FormControl mt={4}>
+              <FormLabel>Due Date</FormLabel>
+              <Input type="date" placeholder="Due Date" value={selectedTask?.dueDate || ''} onChange={(e) => setSelectedTask({...selectedTask, dueDate: e.target.value})} />
+            </FormControl>
+            <FormControl mt={4}>
+              <FormLabel>Category</FormLabel>
+              <Select placeholder="Select category" value={selectedTask?.category || ''} onChange={(e) => setSelectedTask({...selectedTask, category: e.target.value})}>
+                <option>Shopping</option>
+                <option>Leisure</option>
+                {/* Add other categories as needed */}
+              </Select>
+            </FormControl>
+            <FormControl mt={4}>
+              <FormLabel>Priority</FormLabel>
+              <Select placeholder="Select priority" value={selectedTask?.priority || ''} onChange={(e) => setSelectedTask({...selectedTask, priority: e.target.value})}>
+                <option>High</option>
+                <option>Low</option>
+                {/* Add other priorities as needed */}
+              </Select>
+            </FormControl>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" mr={3} onClick={onClose}>
+              Save
+            </Button>
+            <Button onClick={onClose}>Cancel</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Container>
   );
 };
